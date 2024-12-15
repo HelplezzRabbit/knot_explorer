@@ -1,14 +1,20 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#include "stb_image_write.h"
 
 // Function prototypes
 void showCategories();
 void displayKnotOptions(int category);
-void getDescription(int category, int knot);
-void getProcess(int category, int knot);
+void getDescription(int category, int knot, char* description);
+void getProcess(int category, int knot, char* process);
+void create_image(const char* filename, const char* text);
 
 int main() {
     int categoryChoice, knotChoice, descriptionChoice, processChoice;
+    char description[256], process[256];
+    char outputText[512];
 
     printf("Welcome to the Knot Explorer!\n");
     showCategories();
@@ -29,14 +35,23 @@ int main() {
     printf("\nWould you like to see the description of the knot? (1 = Yes, 2 = No): ");
     scanf("%d", &descriptionChoice);
     if (descriptionChoice == 1) {
-        getDescription(categoryChoice, knotChoice);
+        getDescription(categoryChoice, knotChoice, description);
+        strcpy(outputText, "Description: ");
+        strcat(outputText, description);
+    } else {
+        strcpy(outputText, "No description provided.");
     }
 
     printf("\nWould you like to know the process of making the knot? (1 = Yes, 2 = No): ");
     scanf("%d", &processChoice);
     if (processChoice == 1) {
-        getProcess(categoryChoice, knotChoice);
+        getProcess(categoryChoice, knotChoice, process);
+        strcat(outputText, "\nProcess: ");
+        strcat(outputText, process);
     }
+
+    // Create an image of the output text (for simplicity, this will create a basic colored PNG)
+    create_image("output.png", outputText);
 
     printf("\nThank you for exploring knots!\n");
     return 0;
@@ -82,28 +97,49 @@ void displayKnotOptions(int category) {
     }
 }
 
-void getDescription(int category, int knot) {
-    printf("\nDescription of the knot:\n");
+void getDescription(int category, int knot, char* description) {
     if (category == 1 && knot == 1) {
-        printf("Square Knot: A simple binding knot used to secure two ends of a rope together.\n");
+        strcpy(description, "Square Knot: A simple binding knot used to secure two ends of a rope together.");
     } else if (category == 1 && knot == 2) {
-        printf("Bowline Knot: Creates a fixed loop at the end of a rope. It's strong and does not slip.\n");
-    }
-    // Add descriptions for other knots similarly.
-    else {
-        printf("Description not available for this knot.\n");
+        strcpy(description, "Bowline Knot: Creates a fixed loop at the end of a rope. It's strong and does not slip.");
+    } else {
+        strcpy(description, "Description not available for this knot.");
     }
 }
 
-void getProcess(int category, int knot) {
-    printf("\nProcess to make the knot:\n");
+void getProcess(int category, int knot, char* process) {
     if (category == 1 && knot == 1) {
-        printf("Square Knot: Cross right end over left and tuck it under, then repeat with the other ends.\n");
+        strcpy(process, "Square Knot: Cross right end over left and tuck it under, then repeat with the other ends.");
     } else if (category == 1 && knot == 2) {
-        printf("Bowline Knot: Make a loop, pass the working end through, wrap it around and back through the loop.\n");
+        strcpy(process, "Bowline Knot: Make a loop, pass the working end through, wrap it around and back through the loop.");
+    } else {
+        strcpy(process, "Process not available for this knot.");
     }
-    // Add processes for other knots similarly.
-    else {
-        printf("Process not available for this knot.\n");
+}
+
+void create_image(const char* filename, const char* text) {
+    // Set image dimensions
+    int width = 800;
+    int height = 600;
+
+    // Create a buffer for the image
+    unsigned char *image = (unsigned char*)malloc(width * height * 3);
+
+    // Fill the image with a white background
+    for (int y = 0; y < height; y++) {
+        for (int x = 0; x < width; x++) {
+            image[(y * width + x) * 3 + 0] = 255; // Red
+            image[(y * width + x) * 3 + 1] = 255; // Green
+            image[(y * width + x) * 3 + 2] = 255; // Blue
+        }
     }
+
+    // Add some simple text to the image (you may need a proper text rendering library)
+    // For this example, we will not render text but just create a blank image.
+    
+    // Save the image as a PNG file
+    stbi_write_png(filename, width, height, 3, image, width * 3);
+
+    // Clean up
+    free(image);
 }
