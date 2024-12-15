@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Knot Explorer</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 0;
+        }
+        header {
+            background-color: #4CAF50;
+            color: white;
+            padding: 20px 0;
+            text-align: center;
+        }
+        main {
+            margin: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+        .form-section, .result-section {
+            width: 80%;
+            max-width: 600px;
+            background: white;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .form-section select, .form-section button {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .result-section img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+            margin-top: 10px;
+        }
+        footer {
+            text-align: center;
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Welcome to the Knot Explorer!</h1>
+    </header>
+    <main>
+        <div class="form-section">
+            <label for="categories">Choose a category:</label>
+            <select id="categories">
+                <option value="">Select a category</option>
+                <option value="1">Basic Knots</option>
+                <option value="2">Climbing Knots</option>
+                <option value="3">Sailing Knots</option>
+                <option value="4">Decorative Knots</option>
+                <option value="5">Fishing Knots</option>
+                <option value="6">Utility Knots</option>
+                <option value="7">Specialized Knots</option>
+            </select>
+
+            <label for="knots">Choose a knot:</label>
+            <select id="knots" disabled>
+                <option value="">Select a knot</option>
+            </select>
+
+            <button id="submitBtn" disabled>Explore Knot</button>
+        </div>
+
+        <div class="result-section" id="result" style="display: none;">
+            <h2 id="knot-title"></h2>
+            <img id="knot-image" src="" alt="Knot Image">
+            <p id="knot-description"></p>
+        </div>
+    </main>
+    <footer>
+        <p>Thank you for exploring knots with us!</p>
+    </footer>
+
+    <script>
+        const categories = {
+            1: ["Square Knot", "Bowline Knot", "Sheet Bend Knot", "Clove Hitch Knot"],
+            2: ["Figure Eight Knot", "Alpine Butterfly Knot", "Prusik Knot", "Water Knot"],
+            3: ["Rolling Hitch Knot", "Clove Hitch Knot", "Reef Knot", "Bowline Knot"],
+            4: ["Monkey's Fist Knot", "Turk's Head Knot", "Matthew Walker Knot", "Carrick Bend Knot"],
+            5: ["Blood Knot", "Fisherman's Knot", "Improved Clinch Knot", "Barrel Knot"],
+            6: ["Trucker's Hitch Knot", "Taut-Line Hitch Knot", "Round Turn and Two Half Hitches", "Timber Hitch Knot"],
+            7: ["Eldridge Knot", "Gordian Knot", "Klemheist Knot", "Bends"]
+        };
+
+        document.getElementById('categories').addEventListener('change', function() {
+            const category = this.value;
+            const knotSelect = document.getElementById('knots');
+
+            knotSelect.innerHTML = '<option value="">Select a knot</option>';
+            if (category) {
+                categories[category].forEach((knot, index) => {
+                    const option = document.createElement('option');
+                    option.value = index + 1; // Map to C program index
+                    option.textContent = knot;
+                    knotSelect.appendChild(option);
+                });
+                knotSelect.disabled = false;
+                document.getElementById('submitBtn').disabled = true;
+            } else {
+                knotSelect.disabled = true;
+                document.getElementById('submitBtn').disabled = true;
+            }
+        });
+
+        document.getElementById('knots').addEventListener('change', function() {
+            const knot = this.value;
+            document.getElementById('submitBtn').disabled = !knot;
+        });
+
+        document.getElementById('submitBtn').addEventListener('click', function() {
+            const category = document.getElementById('categories').value;
+            const knot = document.getElementById('knots').value;
+
+            fetch(`backend_endpoint?category=${category}&knot=${knot}`) // Replace backend_endpoint with actual server endpoint
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('knot-title').textContent = data.title;
+                    document.getElementById('knot-image').src = data.image;
+                    document.getElementById('knot-description').textContent = data.description;
+                    document.getElementById('result').style.display = 'block';
+                })
+                .catch(error => {
+                    alert('Error fetching data. Please try again.');
+                });
+        });
+    </script>
+</body>
+</html>
